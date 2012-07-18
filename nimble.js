@@ -6,9 +6,12 @@
  *
  * This source code is optimized for minification and gzip compression, not
  * readability. If you want reassurance, see the test suite.
+ * 
+ * @edited by Todd Wolfson https://github.com/twolfson/nimble
  */
-
-(function (exports) {
+ 
+define(function () {
+    var exports = {};
 
     var keys = Object.keys || function (obj) {
         var results = [];
@@ -202,29 +205,30 @@
     };
 
     exports.parallel = function (fns, callback) {
-        var results = new fns.constructor();
+        var results = [null];
         eachParallel(fns, function (fn, k, cb) {
-            fn(function (err) {
-                var v = Array.prototype.slice.call(arguments, 1);
-                results[k] = v.length <= 1 ? v[0]: v;
+            fn(function (err, data) {
+                results[k + 1] = data;
                 cb(err);
             });
         }, function (err) {
-            (callback || function () {})(err, results);
+            results[0] = err;
+            (callback || function () {}).apply(this, results);
         });
     };
 
     exports.series = function (fns, callback) {
-        var results = new fns.constructor();
+        var results = [null];
         eachSeries(fns, function (fn, k, cb) {
             fn(function (err, result) {
-                var v = Array.prototype.slice.call(arguments, 1);
-                results[k] = v.length <= 1 ? v[0]: v;
+                results[k + 1] = data;
                 cb(err);
             });
         }, function (err) {
-            (callback || function () {})(err, results);
+            results[0] = err;
+            (callback || function () {}).apply(this, results);
         });
     };
 
-}(typeof exports === 'undefined' ? this._ = this._ || {}: exports));
+    return exports;
+});
